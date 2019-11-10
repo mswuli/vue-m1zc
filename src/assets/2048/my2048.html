@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>my2048</title>
+	<meta charset="utf-8">
+	<link rel="stylesheet" type="text/css" href="css/2048style.css">
+	<script src="js/jquery-1.8.3.min.js"></script>
+	<!-- <script src="js/main.js"></script>
+	<script src="js/move.js"></script>
+	<script src="js/support.js"></script> -->
+</head>
+<body>
+	<div id="grid-container">
+		<div class="grid-cell" id="grid-cell-0-0"></div>
+		<div class="grid-cell" id="grid-cell-0-1"></div>
+		<div class="grid-cell" id="grid-cell-0-2"></div>
+		<div class="grid-cell" id="grid-cell-0-3"></div>
+
+		<div class="grid-cell" id="grid-cell-1-0"></div>
+		<div class="grid-cell" id="grid-cell-1-1"></div>
+		<div class="grid-cell" id="grid-cell-1-2"></div>
+		<div class="grid-cell" id="grid-cell-1-3"></div>
+
+		<div class="grid-cell" id="grid-cell-2-0"></div>
+		<div class="grid-cell" id="grid-cell-2-1"></div>
+		<div class="grid-cell" id="grid-cell-2-2"></div>
+		<div class="grid-cell" id="grid-cell-2-3"></div>
+
+		<div class="grid-cell" id="grid-cell-3-0"></div>
+		<div class="grid-cell" id="grid-cell-3-1"></div>
+		<div class="grid-cell" id="grid-cell-3-2"></div>
+		<div class="grid-cell" id="grid-cell-3-3"></div>
+		
+	</div>
+	<script>
+		var board = new Array();
+		$(document).ready(function(){
+			// 1.初始化棋盘格子
+			init();
+			// 2.在随机两个格子生成数字,生成数字的函数调用两次
+			generaOneNumber();
+			generaOneNumber();
+		})
+		
+		// 初始化棋盘格子
+		function init(){
+			for(var i=0;i<4;i++){
+				for(var j=0;j<4;j++){
+					var gridCell = $("#grid-cell-"+i+"-"+j);//获取每个小格子节点
+					// 设置每个小格子的位置
+					gridCell.css("top",getPosTop(i,j));//上边的距离getPosTop(i,j)是函数定义在support.js内
+					gridCell.css("left",getPosLeft(i,j));//左边的距离
+				}
+			}
+		
+			// 把board设为二维数组
+			for (var i = 0; i < 4; i++){
+				board[i] = new Array();//board成为二维数组
+				// 初始化每个board的值
+				for(var j = 0; j < 4; j++){
+					board[i][j] = 0;
+				}
+			}
+				// console.log(board)
+			//updateBoardView();//调用函数，通知前端
+			//score = 0; //分数赋值为0	
+		}// init 结束符
+		
+		function getPosTop(i,j){
+			return 20 + i*120;
+		}
+		
+		function getPosLeft(i,j){
+			return 20 + j*120;
+		}
+	
+	
+		// 函数功能：在随机1个格子内生成数字
+		function generaOneNumber(){
+			// 先判断棋盘格内是否还有空间，有空间就能生成数字
+			if(nospace(board)){ //nospace(board)是个函数，放在support.js中
+				return false;
+			}else{
+				// 随机一个位置 并判断这个位置是否有数字了，如果有就找下一个位置，没有就Ok
+				var randX = parseInt(Math.floor(Math.random()*4));
+				var randY = parseInt(Math.floor(Math.random()*4));
+				while(true){
+					if(board[randX][randY] == 0){
+						break;
+					}else{
+						randX = parseInt(Math.floor(Math.random()*4));
+						randY = parseInt(Math.floor(Math.random()*4));
+					}
+				}
+				// 随机一个数字
+				var randNumber = Math.random()<0.5?2:4;
+				// 在随机的位置显示随机的数字
+				board[randX][randY] = randNumber;//在随机的位置更新这个数
+				// 显示到页面需要一个动画效果，定义一个动画函数在此处调用,定义在move.js中
+				showNumberWithAnimation(randX,randY,randNumber);
+				return true;
+			}
+		}//generaOneNumber结束符
+		// 判断棋盘格上是否还有空间
+		function nospace(board){
+			for(var i=0;i<4;i++){
+				for(var j=0;j<4;j++){
+					if(board[i][j] == 0){
+						return false;//还有空间
+					}
+				}
+			}
+		
+			return true;
+		}
+		// 在随机的位置显示随机的数字动画效果
+		function showNumberWithAnimation(i,j,randNumber){
+			var numberCell = $("#number-cell-"+i+"-"+j);//将number-cell元素放到变量中，操作方便
+			numberCell.css("background-color",getNumberBackgroundColor(randNumber));//每个数字的背景色也不一样 getNumberBackgroundColor()是个函数 定义在support.js内
+			numberCell.css("color",getNumberColor(randNumber));//每个数字的颜色getNumberColor()是个函数定义在support.js内
+			console.log(numberCell,randNumber)
+			numberCell.text(randNumber);//显示数字的值
+		
+			numberCell.animate({
+				width:"100px",
+				height:"100px",
+				top:getPosTop(i,j),
+				left:getPosLeft(i,j)
+			},50);
+			
+		}
+		
+		// 设置不同数值的背景色
+		function getNumberBackgroundColor(number){
+			switch(number){
+				case 2:return "#eee4da";break;
+				case 4:return "#ede0c8";break;
+				case 8:return "#f2b179";break;
+				case 16:return "#f59563";break;
+				case 32:return "#f67c5f";break;
+				case 64:return "#f65e3b";break;
+				case 128:return "#edcf72";break;
+				case 256:return "#edcc61";break;
+				case 512:return "#9c0";break;
+				case 1024:return "#33b5e5";break;
+				case 2048:return "#09c";break;
+				case 4096:return "#a6c";break;
+				case 8192:return "#93c";break;
+				default: return "black"
+			}
+		}
+		
+		
+		// 设置不同数值的字的颜色
+		function getNumberColor(number){
+			if(number <= 4){
+				return "#776e65";
+			}else{
+				return "white";
+			}
+		}
+	
+	</script>
+</body>
+</html>
